@@ -1,0 +1,80 @@
+#closeIcon {
+    float: right;
+    margin-top: -40px;
+}
+
+#title {
+    color:white;
+    transition-duration: 0.5s;
+}
+
+#title:hover {
+    color:gray;
+}
+
+ul {
+    list-style-type: none;
+    margin-top: 14px;
+}
+
+li {
+    display: inline;
+    margin: 10px;
+    text-decoration: none;
+    color:gray;
+    margin-bottom: 10px;
+    transition-duration: 0.5s;
+}
+
+a {
+    text-decoration: none;
+}
+
+li:hover {
+    color:white;
+}
+
+* {
+    font-family: 'Poppins';
+}
+
+#welcome {
+    color:white;
+}
+
+.closeIcon {
+    opacity: 0.5;
+    background-color:white; 
+    border:none; 
+    width: 60px;
+    float: right;
+    margin-top: -40px;
+    
+}
+
+.closeIcon:hover {
+    opacity: 1;
+}
+
+#closeIcon {
+    opacity: 0.5;
+    background-color:white; 
+    border:none; 
+    width: 60px;
+    
+}
+
+#closeIcon:hover {
+    opacity: 1;
+}
+
+/*#taskCard:hover {
+    transition-duration: 0.2s;
+    box-shadow: 5px 5px 5px;
+
+}*/
+
+#completed {
+    background-color: lightgreen;
+    opacity: 1;
+}

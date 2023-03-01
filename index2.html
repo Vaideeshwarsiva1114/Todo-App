@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bellefair&family=Poppins:wght@100;200;300;400;600;800&family=Roboto+Condensed:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://img.icons8.com/plasticine/1x/todo-list.png"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <title>Todo App</title>
+
+    <script type="text/javascript">
+        function preback() {
+            window.history.forward();
+          }
+  
+          setTimeout("preback()", 0);
+          window.onunload = function() {null};
+      </script>
+
+</head>
+<body onunload="preback()">
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a href="index2.html"><span class="navbar-brand mb-0 h1" id="title">Todo App</span></a>
+          
+          <span class="navbar-text">
+            <ul>
+                <li id="welcome"></li>
+                <a href="index.html" id="logout"><li>Logout</li></a>
+            </ul>
+          </span>
+        </div>
+
+      </nav>
+
+      <div class="container">
+        <h1 class="text-center mt-5">Tasks</h1>
+        <div id="tasks">
+           <!--<p class="text-center" style="color:grey; font-style: italic;" id="none"></p>-->
+        </div>
+        <form>
+            <div class="input-group mb-3">
+                <input  type="text" class="form-control" placeholder="Add Task" aria-label="Task" id="task" required>
+            </div>
+            <div class="d-grid gap-2 col-6 mx-auto">
+                <button type="button"  class="btn btn-dark mb-3" id="add">+ Add Task</button>
+                <button type="button"  class="btn btn-danger mb-3" id="delete">&times; Delete All Tasks</button>
+            </div>
+        </form>
+      </div>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+       import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
+       import { getDatabase, ref, onValue, get, child, set, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+       import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+       // TODO: Add SDKs for Firebase products that you want to use
+       // https://firebase.google.com/docs/web/setup#available-libraries
+     
+       // Your web app's Firebase configuration
+       const firebaseConfig = {
+         apiKey: "AIzaSyBkmCb8zyRYjyM6N7r9QQPaGo_l3gwKRYQ",
+         authDomain: "todoapp-9d2fd.firebaseapp.com",
+         databaseURL: "https://todoapp-9d2fd-default-rtdb.firebaseio.com",
+         projectId: "todoapp-9d2fd",
+         storageBucket: "todoapp-9d2fd.appspot.com",
+         messagingSenderId: "826943280910",
+         appId: "1:826943280910:web:5ace519bc0059c020ae95f"
+       };
+     
+       // Initialize Firebase
+       const app = initializeApp(firebaseConfig);
+       console.log(app);
+
+       //const tasks = ["Welcome to Todo App!"]
+
+       const database = getDatabase(app);
+ 
+       const auth = getAuth();
+
+       const tasks = [];
+
+       var counter = 0;
+
+       var taskDivs = document.getElementById("tasks").value;
+       console.log(taskDivs);
+
+
+       
+
+
+       window.onload = function() {
+        console.log(sessionStorage.getItem('isLoggedIn'));
+        console.log("GET OUT OF HERE!");
+
+
+       }
+
+        
+
+
+       function session() {
+        //.setItem("IsThisFirstTime_Log_From_LiveServer", false);
+       }
+
+       window.onload = function() {
+        console.log(document.referrer);
+        //sessionStorage.setItem("isLoggedIn", "true");
+        if(sessionStorage.getItem('isLoggedIn') == "false") {
+            window.location.href = "index.html";
+        }
+        document.getElementById("logout").onclick = function() {
+        auth.signOut().then(function() {
+            //alert("User Signed Out!")
+            //session();
+            sessionStorage.setItem('isLoggedIn', "false");
+            window.location.href = "index.html";
+        }, function(error) {
+            alert(error);
+        });
+       }
+
+        }
+
+        let dataLoaded = false;
+        var loading = true;
+
+       onAuthStateChanged(auth, (user) => {
+
+        if(sessionStorage.getItem('isLoggedIn') == null) {
+            window.location.href = "index.html";
+            //console.log("NOT WOKRS")
+        }
+
+        document.getElementById("tasks").innerHTML = '';
+        
+        console.log(user.uid);
+        const userId = user.uid;
+
+        var taskListRef = ref(database, 'users/' + userId + '/tasks');
+        var newTaskRef = push(taskListRef);
+
+        document.getElementById("delete").onclick = function() {
+            //console.log("All items deleted!");
+            remove(ref(database, 'users/' + userId + '/tasks'));
+
+            onValue(taskCountRef, (snapshot) => {
+            const data = snapshot.val();
+
+            var taskRefObject = String(newTaskRef).substring(91)
+
+            
+            snapshot.forEach(function(element) {
+                //console.log(element);
+            })
+          })
+
+          location.reload();
+
+            
+        }
+
+
+        const taskCountRef = ref(database, 'users/' + userId + '/tasks/');
+        //let counter = 0
+        let taskId = newTaskRef._path.pieces_[3];
+
+        console.log("COUNTER");
+        console.log(counter);
+
+        if(counter == 0) {
+            onValue(taskCountRef, (snapshot) => {
+            const data = snapshot.val();
+            //tasks.push(data);
+            //console.log(tasks);
+            console.log(data);
+            console.log(taskId);
+
+            var taskRefObject = String(newTaskRef).substring(91)
+
+
+            
+            snapshot.forEach(function(element) {
+                    //console.log(data);
+                    //console.log(data[element.ref._path.pieces_[3]]);
+                    console.log("ELEMENT:");
+                    console.log(element);
+                    var tasks = document.getElementsByClassName("btn-close");
+
+                    for(var i = 0; i < tasks.length; i++) {
+                        for(var j = 0; j < tasks.length; j++) {
+                            if(tasks[i].id == tasks[j].id) {
+                                console.log("THERE IS AN ITEM");
+                            }
+                        }
+                        console.log(tasks);
+                        console.log(tasks[i].id);
+                    }
+
+                //console.log((taskCountRef  + "/" + element.ref._path.pieces_[3]));
+                //console.log(element.ref._path.pieces_[3]);
+                    document.getElementById("tasks").innerHTML += `
+            <div class="card" class="task" id="taskCard" accessKey="${element.ref._path.pieces_[3]}">
+            <div class="card-body" id="taskList">
+                <p class="card-text">${data[element.ref._path.pieces_[3]].task}</p>
+                <button type="button" class="btn-close check closeIcon"  aria-label="Close" id="${element.ref._path.pieces_[3]}"></button>
+            </div>  
+        </div><br>
+        `;
+
+        console.log(document.getElementById("closeIcon"));
+
+        console.log("HOO");
+        console.log(tasks);
+        console.log("COUNTER");
+        console.log(counter);
+
+        counter++;
+
+
+
+        for(var i = 0; i < tasks.length; i++) {
+            console.log(tasks[i].id);
+            document.getElementById(tasks[i].id).onclick = function() {
+                console.log(this.id);
+                remove(ref(database, 'users/' + userId + '/tasks/' + this.id));
+                location.reload();
+            }
+        }
+
+                //console.log(element.ref._path.pieces_[3]);
+              
+            })
+            loading = false;
+          })
+
+          //console.log(tasks);
+        }
+    
+        counter++;
+        console.log(counter);
+        dataLoaded = true;
+        //console.log(dataLoaded);
+
+        //console.log(tasks);
+
+        //user.displayName = name;
+        
+        if (user) {
+            // User is signed in, see docs for a list of available properties
+            // https://firebase.google.com/docs/reference/js/firebase.User
+            const uid = user.uid;
+            //console.log(user);
+            document.getElementById("welcome").innerHTML += "Hello, " + user.email;
+            // ...  
+            
+
+        }
+
+
+        document.getElementById("add").onclick = function() {
+            document.getElementById("tasks").innerHTML = '';
+            console.log("COUNTER VAR:")
+            console.log(counter)
+
+        if(document.getElementById("task").value.replace(/\s/g, "").length <= 0) {
+            alert("Please enter a task before adding.");
+        }
+
+        else {
+            const userId = user.uid;
+
+            //tasks.push("290");
+            
+            
+
+            var task = document.getElementById("task").value;
+            tasks.push(task);
+            console.log(tasks);
+            document.getElementById("task").value = "";
+
+            console.log("New task ref: " + String(newTaskRef).substring(91));
+            set(newTaskRef, {
+                task: tasks[tasks.length - 1]
+            });
+
+            taskListRef = ref(database, 'users/' + userId + '/tasks');
+            newTaskRef = push(taskListRef);
+            
+
+        var taskList = document.getElementsByClassName("taskListClass");
+
+        for(var i = 0; i < taskList; i++) {
+            console.log(taskList[i]);
+        }
+
+        document.getElementById("closeIcon").addEventListener("click", function() {
+            console.log("Item delted");
+            location.reload();
+        })
+    
+        onValue(taskCountRef, (snapshot) => {
+            const data = snapshot.val();
+            
+            //console.log(data);
+            //console.log(taskId);
+
+            snapshot.forEach(function(element) {
+                console.log(element);
+            })
+
+        })
+            
+
+            //console.log(tasks);
+            
+            
+
+            if(document.getElementById("tasks").innerHTML == "") {
+                document.getElementById("none").innerHTML = "No tasks";
+            }
+            else {
+                document.getElementById("none").innerHTML = "";
+            }
+
+        }
+
+    }
+
+        
+
+      })
+      
+
+
+    
+
+    
+ 
+     </script>
+</body>
+</html>
